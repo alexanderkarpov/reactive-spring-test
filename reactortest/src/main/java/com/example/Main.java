@@ -62,18 +62,19 @@ public class Main {
         BaseSubscriber<Long> customSubscriber = new BaseSubscriber<Long>() {
             @Override
             protected void hookOnComplete() {
-                System.out.println("OnComplete");
+                System.out.println("*** OnComplete");
             }
 
             @Override
             protected void hookOnSubscribe(Subscription subscription) {
-                super.hookOnSubscribe(subscription);
-                System.out.println("onSubscribe: " + subscription);
+                System.out.println("*** onSubscribe: " + subscription);
+                request(1);
             }
 
             @Override
             protected void hookOnNext(Long value) {
-                System.out.println("onNext: " + value);
+                request(1);
+                System.out.println("*** onNext: " + value);
             }
 
             @Override
@@ -83,12 +84,12 @@ public class Main {
 
             @Override
             protected void hookOnCancel() {
-                System.out.println("onCancel");
+                System.out.println("*** onCancel");
             }
 
             @Override
             protected void hookFinally(SignalType type) {
-                System.out.println("finally");
+                System.out.println("*** finally");
             }
         };
 
