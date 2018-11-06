@@ -102,6 +102,13 @@ public class Main {
 
         Thread.sleep(2000);
 
+        System.out.println("--- Sampling elements ---");
+        Flux.range(1, 100).map(i -> "!" + i)
+                .delayElements(Duration.ofMillis(1))
+                .sample(Duration.ofMillis(20))
+                .subscribe(new CustomSubscriber<>());
+
+        Thread.sleep(1000);
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -160,6 +167,4 @@ public class Main {
             System.out.println(name + ": finally" + " [" + Thread.currentThread().getId() + "]");
         }
     }
-
-
 }
