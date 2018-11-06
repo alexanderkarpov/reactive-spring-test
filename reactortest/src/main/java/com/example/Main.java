@@ -1,5 +1,6 @@
 package com.example;
 
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.reactivestreams.Subscription;
@@ -80,16 +81,30 @@ public class Main {
         Flux.range(2018, 5)
                 .timestamp()
                 .index()
-                .subscribe(new CustomSubscriber<>(1, 777));
+                .subscribe(new CustomSubscriber<>(1, 33));
+
+
+        //Filtering reactive sequences
+        System.out.println("Filtering reactive sequences");
+        Flux.just(1, 2, 3, 4, 5, 6).ignoreElements().subscribe(new CustomSubscriber<>());
+
+        Flux.just(1, 2, 3, 4, 5, 6)
+                .takeUntil(n -> n > 3)
+                .subscribe(new CustomSubscriber<>());
 
     }
 
     @EqualsAndHashCode(callSuper = true)
     @Value
-    private static class  CustomSubscriber<T> extends BaseSubscriber<T> {
+    @AllArgsConstructor
+    private static class CustomSubscriber<T> extends BaseSubscriber<T> {
 
         long request;
         long processingTimeout;
+
+        CustomSubscriber() {
+            this(Long.MAX_VALUE, 0);
+        }
 
         @Override
         protected void hookOnComplete() {
