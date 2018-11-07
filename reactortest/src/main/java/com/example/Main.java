@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import org.reactivestreams.Subscription;
 
@@ -101,6 +102,43 @@ public class Main {
                 .subscribe(new CustomSubscriber<>());
 
         Thread.sleep(2000);
+
+        System.out.println("--- Reducing stream elements ---");
+        Flux.just(3, 5, 7, 9, 11, 15, 16, 17).repeat()
+                .any(e -> e % 2 == 0)
+                .subscribe(new CustomSubscriber<>());
+
+        Flux.range(1, 5)
+                .reduce(0, (acc, elem) -> acc + elem)
+                .subscribe(new CustomSubscriber<>());
+
+        Flux.range(1, 5)
+                .scan(0, (acc, elem) -> acc + elem)
+                .subscribe(new CustomSubscriber<>());
+
+        System.out.println("--- Running average ---");
+        int bucketSize = 5;
+        Flux.range(1, 500)
+                .index()
+                .scan(
+                        new Integer[bucketSize],
+                        (acc, elem) -> {
+                            acc[(int) (elem.getT1() % bucketSize)] = elem.getT2();
+                            return acc;
+                        })
+                .skip(bucketSize)
+                .map(Arrays::asList)
+                .map(list -> list.stream().map(e -> Optional.ofNullable(e).orElse(0)).sorted().collect(Collectors.toList()))
+                .map(list -> list.stream().mapToInt(i -> i).sum() * 1.0 / bucketSize)
+                .index()
+                .subscribe(new CustomSubscriber<>());
+
+        System.out.println("--- then , thenMany , and thenEmpty operators ---");
+        Flux.just(1, 2, 3)
+                .thenMany(Flux.just("A", "B", "C"))
+//                .then()
+//                .thenEmpty(Flux.just(22).then())
+                .subscribe(new CustomSubscriber<>());
 
         System.out.println("--- Sampling elements ---");
         Flux.range(1, 100).map(i -> "!" + i)
