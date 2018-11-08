@@ -146,7 +146,17 @@ public class Main {
                 .sample(Duration.ofMillis(20))
                 .subscribe(new CustomSubscriber<>());
 
+
         Thread.sleep(1000);
+
+        System.out.println("--- Batching stream elements ---");
+        Flux.range(1, 30).buffer(8).subscribe(new CustomSubscriber<>());
+
+        System.out.println("---Grouping elements elements ---");
+        Flux.range(1, 7)
+                .groupBy(e -> e % 2 == 0 ? "Even" : "Odd ")
+                .subscribe(groupFlux -> groupFlux.subscribe(new CustomSubscriber<>(groupFlux.key())));
+
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -166,6 +176,10 @@ public class Main {
 
         CustomSubscriber(long request, long processingTimeout) {
             this("subscriber#" + id.getAndIncrement(), request, processingTimeout);
+        }
+
+        public CustomSubscriber(String name) {
+            this("subscriber#" + name, Long.MAX_VALUE, 0);
         }
 
         @Override
