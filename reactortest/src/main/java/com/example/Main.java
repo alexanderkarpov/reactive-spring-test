@@ -2,7 +2,9 @@ package com.example;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -217,6 +219,25 @@ public class Main {
 
         Thread.sleep(1500);
 
+        log.info("--- Handling errors ---");
+        Flux.just("user-1")
+                .flatMap(user ->
+                        recommendedBooks(user)
+                        .retryBackoff(5, Duration.ofMillis(100))
+                        .timeout(Duration.ofSeconds(3))
+                        .onErrorResume(e -> Flux.just("The Martian")))
+                .subscribe(new CustomSubscriber<>());
+
+        Thread.sleep(15000);
+    }
+
+    private static Flux<String> recommendedBooks(String userId) {
+
+        return Flux.defer(() ->
+                (new Random()).nextInt(10) < 7 ?
+                        Flux.<String>error(new RuntimeException("Err")).delaySequence(Duration.ofMillis(100)) :
+                        Flux.just("Blue Mars", "The Expanse").delayElements(Duration.ofMillis(50))
+        ).doOnSubscribe(s -> log.info("Request for {}", userId)).doOnError(t -> log.warn("Error: {} {}", t.getMessage(), new Date()));
     }
 
 }
