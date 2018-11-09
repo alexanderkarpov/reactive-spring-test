@@ -201,11 +201,21 @@ public class Main {
 
         log.info("--- Wrapping disposable resources into Reactive Streams ---");
 
-        Flux.using(
+        Flux<String> fluxUsing = Flux.using(
                 Connection::newConnection,
                 connection -> Flux.fromIterable(connection.getData()),
                 Connection::close
+        );
+        fluxUsing.subscribe(new CustomSubscriber<>());
+
+        Flux.usingWhen(
+                Transaction.beginTransaction(),
+                transaction -> transaction.insertRows(Flux.just("A", "B", "C")),
+                Transaction::commit,
+                Transaction::rollback
         ).subscribe(new CustomSubscriber<>());
+
+        Thread.sleep(1500);
 
     }
 
