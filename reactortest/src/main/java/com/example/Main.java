@@ -17,6 +17,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
+/**
+ * https://projectreactor.io/docs/core/release/reference/#which-operator
+ */
 public class Main {
 
     public static void main(String... args) throws Exception {
@@ -152,11 +155,26 @@ public class Main {
         System.out.println("--- Batching stream elements ---");
         Flux.range(1, 30).buffer(8).subscribe(new CustomSubscriber<>());
 
-        System.out.println("---Grouping elements elements ---");
+        System.out.println("--- Grouping elements elements ---");
         Flux.range(1, 7)
                 .groupBy(e -> e % 2 == 0 ? "Even" : "Odd ")
                 .subscribe(groupFlux -> groupFlux.subscribe(new CustomSubscriber<>(groupFlux.key())));
 
+
+        System.out.println("--- Peeking elements while sequence processing ---");
+//        Flux.just(1, 2, 3).concatWith(Flux.error(new RuntimeException("Conn error")))
+//                .doOnEach(s -> System.out.println("#signal: " + s))
+//                .doOnEach(s -> System.out.println("$signal: " + s))
+//                .subscribe(new CustomSubscriber<>());
+
+        Flux.just(1, 2, 3)
+                .materialize()
+//                .dematerialize()
+                .collectList()
+                .subscribe(new CustomSubscriber<>());
+
+        Flux.just(1, 2, 3).log()
+                .subscribe(new CustomSubscriber<>());
     }
 
     @EqualsAndHashCode(callSuper = true)
