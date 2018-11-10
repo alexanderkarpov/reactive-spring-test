@@ -223,9 +223,9 @@ public class Main {
         Flux.just("user-1")
                 .flatMap(user ->
                         recommendedBooks(user)
-                        .retryBackoff(5, Duration.ofMillis(100))
-                        .timeout(Duration.ofSeconds(3))
-                        .onErrorResume(e -> Flux.just("The Martian")))
+                                .retryBackoff(5, Duration.ofMillis(100))
+                                .timeout(Duration.ofSeconds(3))
+                                .onErrorResume(e -> Flux.just("The Martian")))
                 .subscribe(new CustomSubscriber<>());
 
         Thread.sleep(15000);
