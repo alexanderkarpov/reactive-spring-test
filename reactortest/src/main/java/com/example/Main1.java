@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
  * https://projectreactor.io/docs/core/release/reference/#which-operator
  */
 @Slf4j
-public class Main {
+public class Main1 {
 
     public static void main(String... args) throws Exception {
 
