@@ -2,10 +2,13 @@ package com.example;
 
 import java.time.Duration;
 import java.util.UUID;
+import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.ConnectableFlux;
+import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
 
 @Slf4j
 public class Main2 {
@@ -73,6 +76,30 @@ public class Main2 {
                 .subscribe(e -> log.info("$ Elapsed {} ms: {}", e.getT1(), e.getT2()));
 
         Thread.sleep(700);
+
+        log.info("--- Composing and transforming Reactive Streams ---");
+
+        Function<Flux<String>, Flux<String>> logUserInfo =
+                stream -> stream
+                        .timestamp()
+                        .doOnNext(tp ->
+                                log.info("[{}] User: {}", tp.getT1(), tp.getT2()))
+                        .map(Tuple2::getT2);
+
+        Flux<String> flux = Flux.range(1000, 3)
+                .map(i -> "user-" + i)
+                .transform(logUserInfo);
+
+        flux.subscribe(new CustomSubscriber<>());
+
+
+        DirectProcessor<Integer> objectDirectProcessor = DirectProcessor.create();
+        objectDirectProcessor.subscribe(new CustomSubscriber<>());
+        objectDirectProcessor.subscribe(new CustomSubscriber<>());
+        objectDirectProcessor.subscribe(new CustomSubscriber<>());
+        objectDirectProcessor.onNext(5);
+        objectDirectProcessor.onNext(6);
+        objectDirectProcessor.onNext(7);
     }
 
 }
