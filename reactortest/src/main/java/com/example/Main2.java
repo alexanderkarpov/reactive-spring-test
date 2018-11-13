@@ -66,7 +66,11 @@ public class Main2 {
         Flux.range(0, 5)
                 .delayElements(Duration.ofMillis(100))
                 .elapsed()
-                .subscribe(e -> log.info("Elapsed {} ms: {}", e.getT1(), e.getT2()));
+                .subscribe(e -> log.info("# Elapsed {} ms: {}", e.getT1(), e.getT2()));
+
+        Flux.interval(Duration.ofMillis(90))
+                .elapsed()
+                .subscribe(e -> log.info("$ Elapsed {} ms: {}", e.getT1(), e.getT2()));
 
         Thread.sleep(700);
     }
