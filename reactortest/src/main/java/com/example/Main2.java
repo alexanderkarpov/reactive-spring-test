@@ -48,6 +48,27 @@ public class Main2 {
         Thread.sleep(1200);
         cachedSource.subscribe(new CustomSubscriber<>("caching-3"));
 
+        log.info("--- Sharing elements of a stream ---");
+        Flux<Integer> source2 = Flux.range(0, 5)
+                .delayElements(Duration.ofMillis(100))
+                .doOnSubscribe(s ->
+                        log.info("new subscription for the cold publisher"));
+        Flux<Integer> sharedSource = source2.share();
+        log.info("the source is shared");
+        Thread.sleep(150);
+        sharedSource.subscribe(e -> log.info("[S 1] onNext: {}, {}", e));
+        Thread.sleep(400);
+        sharedSource.subscribe(e -> log.info("[S 2] onNext: {}, {}", e));
+        Thread.sleep(1500);
+
+
+        log.info("--- Dealing with time ---");
+        Flux.range(0, 5)
+                .delayElements(Duration.ofMillis(100))
+                .elapsed()
+                .subscribe(e -> log.info("Elapsed {} ms: {}", e.getT1(), e.getT2()));
+
+        Thread.sleep(700);
     }
 
 }
