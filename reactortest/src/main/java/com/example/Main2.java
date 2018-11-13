@@ -23,18 +23,20 @@ public class Main2 {
         coldPublisher.subscribe(new CustomSubscriber<>());
         log.info("Data was generated twice for two subscribers");
 
+        log.info("--- Multicasting elements of a stream ---");
         Flux<Integer> source = Flux.range(0, 3)
-
+                .delayElements(Duration.ofMillis(200))
                 .doOnSubscribe(s -> log.info("new subscription for the cold publisher: {}", s));
         log.info("source flux created");
         ConnectableFlux<Integer> conn = source.publish();
         log.info("connectable flux created");
 
+        conn.connect();
+        Thread.sleep(250);
         conn.subscribe(new CustomSubscriber<>());
         conn.subscribe(new CustomSubscriber<>());
 
         log.info("all subscribers are ready, connecting");
-        conn.connect();
 
 
         log.info("--- Caching elements of a stream ---");
@@ -43,13 +45,8 @@ public class Main2 {
 
         cachedSource.subscribe(new CustomSubscriber<>("caching-1"));
         cachedSource.subscribe(new CustomSubscriber<>("caching-2"));
-
         Thread.sleep(1200);
-
         cachedSource.subscribe(new CustomSubscriber<>("caching-3"));
-        Thread.sleep(1200);
-
-
 
     }
 
